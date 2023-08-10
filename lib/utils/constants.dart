@@ -1,2 +1,3 @@
 const appName = 'Quick Chat';
-const serverUrl = ''; //backend hosting api url: PORT
+const serverUrl =
+    'http://163.22.17.145:80/quick-chat-node'; //backend hosting api url: PORT

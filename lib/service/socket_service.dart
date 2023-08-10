@@ -50,6 +50,10 @@ class SocketService {
       print('add message success');
     });
 
+    _socket.onConnect((_) {
+      print('connect');
+    });
+
     //when users are connected or disconnected
     _socket.on('users', (data) {
       var users = (data as List<dynamic>).map((e) => e.toString()).toList();
