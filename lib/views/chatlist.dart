@@ -1,7 +1,9 @@
+import 'package:chatroom/service/streamSocket.dart';
 import 'package:chatroom/views/chat/chat_page.dart';
 import 'package:flutter/material.dart';
 import 'setup/setup_page.dart';
 import 'package:chatroom/service/socket_service.dart';
+import 'package:chatroom/service/notification_service.dart';
 
 class ChatListView extends StatefulWidget {
   const ChatListView({super.key});
@@ -23,6 +25,7 @@ class _ChatListViewState extends State<ChatListView> {
           return ListTile(
             title: Text(chatRooms[index]),
             onTap: () {
+              // StreamSocket.connectAndListen();
               SocketService.setUserName(name);
               SocketService.setChatRoomId(chatRooms[index]); // 設定聊天室 ID
               SocketService.connectAndListen();

@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors, no_leading_underscores_for_local_identifiers, prefer_const_constructors_in_immutables, avoid_print
 
+import 'package:chatroom/http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:chatroom/service/socket_service.dart';
 import 'package:chatroom/model/chat.dart';
+import 'package:flutter/scheduler.dart';
 // import 'package:chatroom/utils/constants.dart';
 
 import 'message_view.dart';
@@ -11,6 +13,7 @@ import 'message_view.dart';
 import 'reply_message.dart';
 import 'package:flutter/services.dart';
 import 'package:swipe_to/swipe_to.dart';
+import 'package:http/http.dart';
 
 // ignore: library_private_types_in_public_api
 // GlobalKey<_ChatTextInputState> chatTextInputKey =
@@ -18,6 +21,8 @@ import 'package:swipe_to/swipe_to.dart';
 // Map<String, dynamic> returnReply = {};
 // String? name = '';
 // String? message = '';
+
+// 最新 這個檔案 整個覆蓋掉
 
 class ChatPage extends StatefulWidget {
   final String chatRoomId;
@@ -92,6 +97,7 @@ class _ChatPageState extends State<ChatPage> {
             leading: CloseButton(
               color: Colors.black,
               onPressed: () {
+                SocketService.dispose();
                 Navigator.of(context).pop();
               },
             ),
@@ -168,47 +174,52 @@ class __ChatBodyState extends State<_ChatBody> {
   // String name = '';
   // String message = '';
   // late Chat replyMessage;
+  List<Chat> chats = [];
+  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    // print(name);
-    // print(message);
   }
 
-  // void updateData(Map<String, dynamic> data) {
-  //   setState(() {
-  //     returnReply = data;
-  //     name = data['key2'];
-  //     message = data['key1'];
-  //   });
-  // }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    var chats = <Chat>[];
-    ScrollController _scrollController = ScrollController();
-
     ///scrolls to the bottom of page
-    void _scrollDown() {
+    void _scrollDown() async {
       try {
-        Future.delayed(
-            const Duration(milliseconds: 300),
-            () => _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent));
+        // if (_scrollController.hasClients) {
+        //   Future.delayed(const Duration(milliseconds: 300), () {
+        //     _scrollController!
+        //         .jumpTo(_scrollController.position.maxScrollExtent);
+        //   });
+        // }
+        if (_scrollController.hasClients) {
+          SchedulerBinding.instance?.addPostFrameCallback((_) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              curve: Curves.fastOutSlowIn,
+              duration: const Duration(milliseconds: 1),
+            );
+          });
+        }
       } on Exception catch (_) {}
     }
 
     return Expanded(
       child: StreamBuilder(
         stream: SocketService.getResponse,
-        builder: (BuildContext context, AsyncSnapshot<Chat> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
           if (snapshot.connectionState == ConnectionState.none) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (snapshot.hasData && snapshot.data != null) {
-            chats.add(snapshot.data!);
+            chats.addAll(snapshot.data!);
           }
           _scrollDown();
           return ListView.builder(
@@ -217,7 +228,7 @@ class __ChatBodyState extends State<_ChatBody> {
             itemBuilder: (BuildContext context, int index) {
               final chat = chats[index];
               return SwipeTo(
-                onRightSwipe: () => widget.onSwipedMessage(chat),
+                // onRightSwipe: () => widget.onSwipedMessage(chat),
                 child: MessageView(
                   chat: chat,
                 ),
@@ -256,6 +267,7 @@ class ChatTextInput extends StatefulWidget {
 
 class _ChatTextInputState extends State<ChatTextInput> {
   var textController = TextEditingController();
+  var focusNode = FocusNode();
   String message = '';
   static final inputTopRadius = Radius.circular(12);
   static final inputBottomRadius = Radius.circular(24);
@@ -274,7 +286,7 @@ class _ChatTextInputState extends State<ChatTextInput> {
   @override
   void initState() {
     super.initState();
-
+    focusNode.unfocus();
     // isReplying = false;
     // setState(() {
     //   name = widget.returnName;
@@ -416,8 +428,8 @@ class _ChatTextInputState extends State<ChatTextInput> {
         );
 
     return Container(
-      margin: const EdgeInsets.all(12),
-      height: 70,
+      margin: const EdgeInsets.all(3),
+      height: 50,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -430,40 +442,37 @@ class _ChatTextInputState extends State<ChatTextInput> {
               onLongPress: () {
                 _pasteTextFromClipboard();
               },
-              child: Column(
-                children: [
-                  if (isReplying) buildReply(),
-                  TextField(
-                    maxLines: null,
-                    focusNode: widget.focusNode,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.send,
-                    autofocus: true,
-                    controller: textController,
-                    onSubmitted: (s) => sendMessage(),
-                    decoration: InputDecoration(
-                        hintText: 'Send a message',
-                        filled: true,
-                        fillColor: Colors.grey,
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.only(
-                              topLeft: isReplying
-                                  ? Radius.zero
-                                  : Radius.circular(24),
-                              topRight: isReplying
-                                  ? Radius.zero
-                                  : Radius.circular(24),
-                              bottomLeft: Radius.circular(24),
-                              bottomRight: Radius.circular(24),
-                            ))),
-                    onChanged: (value) => setState(
-                      () {
-                        message = value;
-                      },
+              child: TextField(
+                // maxLines: null,
+                focusNode: focusNode,
+
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.send,
+                autofocus: true,
+                controller: textController,
+                onSubmitted: (s) => sendMessage(),
+                decoration: InputDecoration(
+                  hintText: '輸入訊息',
+                  filled: true,
+                  // fillColor: Colors.grey,
+
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromRGBO(74, 125, 171, 1),
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
                   ),
-                ],
+                ),
+                onChanged: (value) => setState(
+                  () {
+                    message = value;
+                  },
+                ),
               ),
             ),
           ),

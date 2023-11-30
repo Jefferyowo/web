@@ -83,7 +83,7 @@ class _MessageViewState extends State<MessageView> {
               alignment: Alignment.centerLeft,
               child: Stack(
                 children: <Widget>[
-                  if (widget.chat.activityName != null)
+                  if (widget.chat.message != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -107,7 +107,7 @@ class _MessageViewState extends State<MessageView> {
                             children: [
                               Flexible(
                                   child: Text(
-                                '${widget.chat.activityName}活動',
+                                '${widget.chat.message}活動',
                                 textAlign: TextAlign.left,
                                 style: const TextStyle(
                                     color: Color.fromRGBO(0, 0, 0, 1),
@@ -123,7 +123,7 @@ class _MessageViewState extends State<MessageView> {
                               const SizedBox(height: 2),
                               Flexible(
                                 child: Text(
-                                  '時間:${widget.chat.activityTime}',
+                                  '時間:${widget.chat.message}',
                                   style: const TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 1),
                                       fontFamily: 'DFKai-SB',
@@ -138,7 +138,7 @@ class _MessageViewState extends State<MessageView> {
                               const SizedBox(height: 1),
                               Flexible(
                                 child: Text(
-                                  '地點:${widget.chat.activityLocation}',
+                                  '地點:${widget.chat.message}',
                                   style: const TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 1),
                                       fontFamily: 'DFKai-SB',
@@ -153,7 +153,7 @@ class _MessageViewState extends State<MessageView> {
                               const SizedBox(height: 1),
                               Flexible(
                                 child: Text(
-                                  '參加成員:${widget.chat.activityMemberName}',
+                                  '參加成員:${widget.chat.message}',
                                   style: const TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 1),
                                       fontFamily: 'DFKai-SB',
@@ -235,110 +235,109 @@ class _MessageViewState extends State<MessageView> {
               ),
             )
           : Align(
-              alignment: (returnMessage == 'false')
-                  ? (isSendByUser
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft)
-                  : Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: (returnMessage == 'true')
-                    ? (isSendByUser
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start)
-                    : CrossAxisAlignment.center,
-                children: [
-                  if (returnMessage == 'true')
-                    Text(
-                      '${widget.chat.userMall ?? ''} 已收回了訊息', // 显示谁收回了消息
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+              // 最新 這個Align全部整個覆蓋掉
+              alignment:
+                  isSendByUser ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                // margin: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                child: Column(
+                  // mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: isSendByUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    if (returnMessage == 'true')
+                      Text(
+                        '${widget.chat.userMall ?? ''} 已收回了訊息', // 显示谁收回了消息
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  if (returnMessage == 'false')
-                    Text(
-                      (widget.chat.userMall ?? ''),
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  const SizedBox(height: 4),
-                  if (returnMessage == 'false')
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (isSendByUser)
-                              Text(
-                                '已讀 1',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                            if (isSendByUser)
-                              Text(
-                                widget.f.format(DateTime.parse(
-                                    widget.chat.messageSendTime ?? '')),
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          constraints: BoxConstraints(
-                            maxWidth: size.width * 0.5,
-                            minWidth: size.width * 0.01,
-                          ),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: isSendByUser
-                                  ? Colors.blue
-                                  : Colors.grey.shade500),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (!isSendByUser)
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 8),
-                                  child: CircleAvatar(
-                                    child: Icon(Icons.person, size: 10),
-                                    radius: 8,
-                                  ),
-                                ),
-                              Flexible(
-                                child: Text(
-                                  widget.chat.messageContent ?? 'none',
-                                  style: const TextStyle(color: Colors.white),
-                                  softWrap: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        if (!isSendByUser)
+                    if (returnMessage == 'false')
+                      Text(
+                        (widget.chat.userMall ?? ''),
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    const SizedBox(height: 4),
+                    if (returnMessage == 'false')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
-                                widget.f.format(DateTime.parse(
-                                    widget.chat.messageSendTime ?? '')),
-                                style: const TextStyle(fontSize: 10),
-                              ),
+                              // if (isSendByUser)
+                              //   Text(
+                              //     '已讀 1',
+                              //     style: TextStyle(fontSize: 10),
+                              //   ),
+                              if (isSendByUser)
+                                Text(
+                                  widget.f.format(DateTime.parse(
+                                      widget.chat.messageSendTime ?? '')),
+                                  style: const TextStyle(fontSize: 10),
+                                ),
                             ],
                           ),
-                      ],
-                    ),
-                  const SizedBox(height: 4),
-                ],
+                          SizedBox(
+                            width: 6,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            constraints: BoxConstraints(
+                              maxWidth: size.width * 0.5,
+                              minWidth: size.width * 0.01,
+                            ),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: isSendByUser
+                                    ? Colors.indigo.shade300
+                                    : Colors.grey.shade500),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // if (!isSendByUser)
+                                //   const Padding(
+                                //     padding: EdgeInsets.only(right: 8),
+                                //     child: CircleAvatar(
+                                //       child: Icon(Icons.person, size: 10),
+                                //       radius: 8,
+                                //     ),
+                                //   ),
+                                Flexible(
+                                  child: Text(
+                                    widget.chat.messageContent ?? 'none',
+                                    style: const TextStyle(color: Colors.white),
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 6,
+                          ),
+                          if (!isSendByUser)
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  widget.f.format(DateTime.parse(
+                                      widget.chat.messageSendTime ?? '')),
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
               ),
             ),
     );

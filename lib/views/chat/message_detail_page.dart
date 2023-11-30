@@ -6,6 +6,8 @@ import 'package:chatroom/model/chat.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 
+// 最新 整個覆蓋掉
+
 class MessageDetailPage extends StatefulWidget {
   final Chat chat;
   final Offset position;
@@ -21,24 +23,24 @@ class _MessageDetailPageState extends State<MessageDetailPage> {
   bool showAlreadyRead = false;
   final readTime = DateFormat('MMM d,h:mm a');
   List readUsers = ['名稱1', '名稱2', '名稱3', '名稱4', '名稱5', '名稱6'];
-  String userMallLocal = 'qqq';
+  String userMallLocal = 'qqq'; // 最新 這個userMallLocal要改成user的mail名稱
 
   @override
   Widget build(BuildContext context) {
     bool isSendByUser = widget.chat.userMall == userMallLocal;
-    if (widget.chat.userId == null) {
-      return Center(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          widget.chat.messageContent ?? '',
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ));
-    }
+    // if (widget.chat.userId == null) {
+    //   return Center(
+    //       child: Padding(
+    //     padding: const EdgeInsets.all(8.0),
+    //     child: Text(
+    //       widget.chat.messageContent ?? '',
+    //       style: const TextStyle(
+    //         fontSize: 15,
+    //         fontWeight: FontWeight.bold,
+    //       ),
+    //     ),
+    //   ));
+    // }
 
     var size = MediaQuery.of(context).size;
     return Scaffold(
@@ -80,19 +82,19 @@ class _MessageDetailPageState extends State<MessageDetailPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             color: isSendByUser
-                                ? Colors.blue
+                                ? Colors.indigo.shade300
                                 : Colors.grey.shade500),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (!isSendByUser)
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: CircleAvatar(
-                                  radius: 8,
-                                  child: Icon(Icons.person, size: 10),
-                                ),
-                              ),
+                            // if (!isSendByUser)
+                            //   const Padding(
+                            //     padding: EdgeInsets.only(right: 8),
+                            //     child: CircleAvatar(
+                            //       radius: 8,
+                            //       child: Icon(Icons.person, size: 10),
+                            //     ),
+                            //   ),
                             Flexible(
                               child: Text(
                                 widget.chat.messageContent ?? 'none',
@@ -121,7 +123,9 @@ class _MessageDetailPageState extends State<MessageDetailPage> {
                   constraints: BoxConstraints(
                     maxWidth:
                         MediaQuery.of(context).size.width * 0.6, // 控制框框的最大宽度
-                    maxHeight: MediaQuery.of(context).size.height * 0.4,
+                    maxHeight: isSendByUser
+                        ? MediaQuery.of(context).size.height * 0.24
+                        : MediaQuery.of(context).size.height * 0.16,
                   ),
                   child: Container(
                     alignment: Alignment.centerRight,
@@ -135,20 +139,20 @@ class _MessageDetailPageState extends State<MessageDetailPage> {
                       alignment: Alignment.bottomCenter,
                       child: Column(
                         children: [
-                          if (!showAlreadyRead)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Icon(Icons.check, color: Colors.yellow),
-                                IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        showAlreadyRead = true;
-                                      });
-                                    },
-                                    icon: Icon(Icons.people))
-                              ],
-                            ),
+                          // if (!showAlreadyRead)
+                          //   Row(
+                          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //     children: [
+                          //       Icon(Icons.check, color: Colors.yellow),
+                          //       IconButton(
+                          //           onPressed: () {
+                          //             setState(() {
+                          //               showAlreadyRead = true;
+                          //             });
+                          //           },
+                          //           icon: Icon(Icons.people))
+                          //     ],
+                          //   ),
                           if (!showAlreadyRead)
                             InkWell(
                               onTap: () async {
@@ -161,19 +165,19 @@ class _MessageDetailPageState extends State<MessageDetailPage> {
                                 title: Text('複製'),
                               ),
                             ),
-                          if (!showAlreadyRead)
-                            InkWell(
-                              onTap: () {
-                                Map<String, dynamic> myMap = {};
-                                myMap['key1'] = widget.chat.messageContent!;
-                                myMap['key2'] = widget.chat.userMall;
-                                Navigator.of(context).pop(myMap);
-                              },
-                              child: const ListTile(
-                                leading: Icon(Icons.reply),
-                                title: Text('回覆'),
-                              ),
-                            ),
+                          // if (!showAlreadyRead)
+                          //   InkWell(
+                          //     onTap: () {
+                          //       Map<String, dynamic> myMap = {};
+                          //       myMap['key1'] = widget.chat.messageContent!;
+                          //       myMap['key2'] = widget.chat.userMall;
+                          //       Navigator.of(context).pop(myMap);
+                          //     },
+                          //     child: const ListTile(
+                          //       leading: Icon(Icons.reply),
+                          //       title: Text('回覆'),
+                          //     ),
+                          //   ),
                           if (!showAlreadyRead && isSendByUser)
                             InkWell(
                               onTap: () {
